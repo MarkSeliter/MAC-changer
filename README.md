@@ -1,2 +1,2 @@
 # MAC-changer
-MAC adress changer written in python.
+MAC address changer written in python.
