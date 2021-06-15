@@ -1,47 +1,82 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 
 # this python2 program uses the program 'ip' and not 'ifconfig'.
 
 
 import subprocess
 import optparse
-
+import random
 
 def main():
+    # creating parser object
+    parser = optparse.OptionParser()
 
-	parser = optparse.OptionParser()
+    # options for the parser
+    parser.add_option('-i', '--interface', dest='interface', help="interface to change it's MAC address")
+    parser.add_option('-m', '--mac-addr', dest='mac_address', help="specify which MAC address to use")
+    parser.add_option('-r', '--random', action='store_false' , dest='random_mac', help="generate a random MAC address")
 
-	print('[+] turning ' + inter + ' down...')
+    # output the options and arguments into options and args
+    (options, args) = parser.parse_args()
 
-	# system call to turn the interface down
-	subprocess.call(['ip', 'link', 'set', 'dev', inter, 'down'])
-	
-	print('[+] setting MAC address of ' + mac_addr + ' on the interface ' + inter)
+    # check if we got an interface option
+    if not options.interface:
+        print('please specify an interface to change it\'s MAC address')
+        quit()
 
-	# for now hardcoded the MAC which it will change to
-	subprocess.call(['ip', 'link', 'set', 'dev', inter, 'address', mac_addr])
+    # if we did then it will pass it into a var
+    interface = options.interface
+
+    # check if we got random as an arg
+    if '-r' in args or '--random' in args:
+        # define a var to store the random MAC address
+        random_mac = str()
+
+        # generate 6 random 1 byte sized hex numbers
+        for i in range(0, 6):
+            num = random.randrange(0x0, 0xff, 0x1)
+
+            random_mac = random_mac + num + ':'
+
+            print(random_mac)
+
+        # return the result without the last column
+        mac_address = random_mac[:-1]
+
+    # if not random then the specified MAC
+    elif options.mac_address:
+        mac_address = options.mac_address
+
+    # if we didn't get either, ask user to specify either MAC or RANDOM and quit
+    else:
+        print('please specify a MAC address or use the --random (-r) option')
+        quit()
+
+    change_mac(interface, mac_address)
 
 
-	print('[+] turning ' + inter + ' back up')
+def change_mac(inter, mac):
+    print('[+] turning ' + inter + ' down...')
 
-	# system call to turn the interface up
-	subprocess.call(['ip', 'link', 'set', 'dev', inter, 'up'])
+    # system call to turn the interface down
+    subprocess.call(['ip', 'link', 'set', 'dev', inter, 'down'])
 
-	print('[+] Done')
-	print('-' * 50)
+    print('[+] setting MAC address of ' + mac + ' on the interface ' + inter)
 
-	# display the result
-	subprocess.call(['ip', 'link', 'show', inter])
+    # for now hardcoded the MAC which it will change to
+    subprocess.call(['ip', 'link', 'set', 'dev', inter, 'address', mac])
+
+    print('[+] turning ' + inter + ' back up')
+
+    # system call to turn the interface up
+    subprocess.call(['ip', 'link', 'set', 'dev', inter, 'up'])
+
+    print('[+] Done')
+    print('-' * 50)
+
+    # display the result
+    subprocess.call(['ip', 'link', 'show', inter])
 
 
-def help():
-
-	print('test')
-	print('test')
-	print('test')
-	print('test')
-
-
-if __name__== '__main__':
-
-	main()
+if __name__ == '__main__':
+    main()
