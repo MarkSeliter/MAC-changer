@@ -7,22 +7,15 @@ import subprocess
 import optparse
 import random
 
+
 def main():
-    # creating parser object
-    parser = optparse.OptionParser()
-
-    # options for the parser
-    parser.add_option('-i', '--interface', dest='interface', help="interface to change it's MAC address")
-    parser.add_option('-m', '--mac-addr', dest='mac_address', help="specify which MAC address to use")
-    parser.add_option('-r', '--random', action='store_true' , dest='random_mac', help="generate a random MAC address")
-
-    # output the options and arguments into options and args
-    (options, args) = parser.parse_args()
+    # get the options and args
+    (options, args) = get_args()
 
     # check if we got an interface option
     if not options.interface:
         print('please specify an interface (-i) to change it\'s MAC address')
-        quit()
+        return 1
 
     # if we did then it will pass it into a var
     interface = options.interface
@@ -38,10 +31,24 @@ def main():
     # if we didn't get either, ask user to specify either MAC or RANDOM and quit
     else:
         print('please specify a MAC address (-m / --mac-addr) or use the (-r / --random) option')
-        quit()
+        return 2
 
     change_mac(interface, mac_address)
     return 0
+
+
+# gets the options and arguments from the commandline
+def get_args():
+    # creating parser object
+    parser = optparse.OptionParser()
+
+    # options for the parser
+    parser.add_option('-i', '--interface', dest='interface', help="interface to change it's MAC address")
+    parser.add_option('-m', '--mac-addr', dest='mac_address', help="specify which MAC address to use")
+    parser.add_option('-r', '--random', action='store_true' , dest='random_mac', help="generate a random MAC address")
+
+    # return the options and arguments
+    return parser.parse_args()
 
 
 # changes the MAC address with system commands
