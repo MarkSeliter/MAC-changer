@@ -14,7 +14,7 @@ def main():
     # options for the parser
     parser.add_option('-i', '--interface', dest='interface', help="interface to change it's MAC address")
     parser.add_option('-m', '--mac-addr', dest='mac_address', help="specify which MAC address to use")
-    parser.add_option('-r', '--random', action='store_false' , dest='random_mac', help="generate a random MAC address")
+    parser.add_option('-r', '--random', action='store_true' , dest='random_mac', default=True, help="generate a random MAC address (default)")
 
     # output the options and arguments into options and args
     (options, args) = parser.parse_args()
@@ -28,17 +28,20 @@ def main():
     interface = options.interface
 
     # check if we got random as an arg
-    if '-r' in args or '--random' in args:
+    if options.random_mac:
         # define a var to store the random MAC address
         random_mac = str()
 
         # generate 6 random 1 byte sized hex numbers
         for i in range(0, 6):
-            num = random.randrange(0x0, 0xff, 0x1)
+            # rgenerate random byte sized number
+            num = random.randrange(0, 255, 1)
 
-            random_mac = random_mac + num + ':'
+            # if the number has only 1 digit
+            if num < 10:
+                num = int('0' + str(num))
 
-            print(random_mac)
+            random_mac = random_mac + str(hex(num)[2:]) + ':'
 
         # return the result without the last column
         mac_address = random_mac[:-1]
