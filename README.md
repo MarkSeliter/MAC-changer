@@ -6,6 +6,7 @@ I've made this project in order to strengthen my knowledge in python.
 # Help
 In order to change your MAC address you must have root priviliges.
 
+```
 Usage: mac_changer.py [options]
 
 Options:
@@ -15,4 +16,4 @@ Options:
   -m MAC_ADDRESS, --mac-addr=MAC_ADDRESS
                         specify which MAC address to use
   -r, --random          generate a random MAC address
-
+```
