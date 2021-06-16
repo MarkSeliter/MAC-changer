@@ -56,23 +56,45 @@ def change_mac(inter, mac):
     print('[+] turning ' + inter + ' down...')
 
     # system call to turn the interface down
-    subprocess.call(['ip', 'link', 'set', 'dev', inter, 'down'])
+    check = subprocess.call(['ip', 'link', 'set', 'dev', inter, 'down'])
+
+    # check if the command executed succesfully
+    if check != 0:
+        print('[!] couldn\'t turn ' + inter + ' down')
+        return 3
 
     print('[+] setting MAC address of ' + mac + ' on the interface ' + inter)
 
     # for now hardcoded the MAC which it will change to
-    subprocess.call(['ip', 'link', 'set', 'dev', inter, 'address', mac])
+    check = subprocess.call(['ip', 'link', 'set', 'dev', inter, 'address', mac])
+
+    # check if the command executed succesfully
+    if check != 0:
+        print('[!] couldn\'t set MAC address, please make sure it\'s a valid address')
+        return 4
+
 
     print('[+] turning ' + inter + ' back up')
 
     # system call to turn the interface up
     subprocess.call(['ip', 'link', 'set', 'dev', inter, 'up'])
 
+    # check if the command executed succesfully
+    if check != 0:
+        print('[!] couldn\'t turn ' + inter + ' back up')
+        return 5
+
+
     print('[+] Done')
     print('-' * 50)
 
     # display the result
-    subprocess.call(['ip', 'link', 'show', inter])
+    check = subprocess.call(['ip', 'link', 'show', inter])
+
+    # check if the command executed succesfully
+    if check != 0:
+        print('[!] couldn\'t display ' + inter)
+        return 6
 
 
 # generates random MAC address
