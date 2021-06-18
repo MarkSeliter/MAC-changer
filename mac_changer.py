@@ -20,6 +20,12 @@ def main():
     # if we did then it will pass it into a var
     interface = options.interface
 
+    # check if the interface is valid
+    if not inter_exist(interface):
+        print('[!] please use a valid interface')
+        return 7
+
+
     # if not random then the specified MAC
     if options.mac_address:
         mac_address = options.mac_address
@@ -27,6 +33,10 @@ def main():
     # check if we got random as an arg
     elif options.random_mac:
         mac_address = generate_random_mac()
+
+    # check if we got random as an arg
+    elif options.reset_mac:
+        mac_address = original_mac(interface)
 
     # if we didn't get either, ask user to specify either MAC or RANDOM and quit
     else:
@@ -43,12 +53,37 @@ def get_args():
     parser = optparse.OptionParser()
 
     # options for the parser
-    parser.add_option('-i', '--interface', dest='interface', help="interface to change it's MAC address")
-    parser.add_option('-m', '--mac-addr', dest='mac_address', help="specify which MAC address to use")
-    parser.add_option('-r', '--random', action='store_true' , dest='random_mac', help="generate a random MAC address")
+    parser.add_option('-i', dest='interface', help="interface to change it's MAC address")
+    parser.add_option('-m', dest='mac_address', help="specify which MAC address to use")
+    parser.add_option('-r', action='store_true' , dest='random_mac', help="generate a random MAC address")
+    parser.add_option('-x', action='store_true' , dest='reset_mac', help="reset to original MAC address")
 
     # return the options and arguments
     return parser.parse_args()
+
+
+# checks if the interface exists
+def inter_exist(inter):
+    # checks the return if its not exit code 0
+    check = subprocess.call(['ip', 'link', 'show', inter])
+
+    if check != 0:
+        return False
+
+    return True
+
+
+# change the MAC back to permaddr
+def original_mac(inter):
+    # get the a list of strings of the interface
+    output = str.split(subprocess.check_output(['ip', 'link', 'show', 'dev', inter]))
+
+    # check if the MAC is already the original
+    if 'permaddr' not in output:
+        print('[!] MAC is already the default')
+        quit()
+
+    return output[len(output) - 1]     
 
 
 # changes the MAC address with system commands
@@ -84,17 +119,31 @@ def change_mac(inter, mac):
         print('[!] couldn\'t turn ' + inter + ' back up')
         return 5
 
+    print('-' * 70)
 
-    print('[+] Done')
-    print('-' * 50)
+    # check if MAC address was changed
+    check_result(inter, mac)
+    return 0
 
-    # display the result
-    check = subprocess.call(['ip', 'link', 'show', inter])
 
-    # check if the command executed succesfully
-    if check != 0:
-        print('[!] couldn\'t display ' + inter)
-        return 6
+# final check to see if the MAC was succesfully changed
+def check_result(inter, mac):
+    # get the a list of strings of the interface
+    output = str.split(subprocess.check_output(['ip', 'link', 'show', 'dev', inter]))
+
+    # check if the retuned command contains the new MAC
+    if mac == output[16]:
+        #check if permaddr exist
+        if 'permaddr' in output:
+            print('[+] ' + inter +'\'s new MAC = ' + mac + ' | permaddr = ' + output[len(output) - 1])
+        
+        # if nopermaddr
+        else:
+            print('[+] ' + inter +'\'s new MAC = ' + mac)
+
+    # if failed then print warning
+    else:
+        print('[!] Failed to change MAC')
 
 
 # generates random MAC address
